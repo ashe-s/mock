@@ -1,4 +1,11 @@
+import shuffle from '@/util/shuffleArray'
 
+const settings = {
+    numforClear: 1,
+    cardW: 200,
+    cardH: 300,
+    margin: 20
+}
 
 const lawCards = [{
     id: 'card1'
@@ -16,5 +23,3 @@ const setCards = lawCards.map(val => {
 setCards.map(val => {
     setCards.push(val)
 })
-
-console.log(setCards, lawCards)
