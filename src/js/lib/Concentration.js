@@ -115,6 +115,14 @@ function gameOver() {
     alart('game over!')
 }
 
+/**
+ * カードを表示
+ * @param {Object} elm // viewエリアになるDOM要素
+ */
+function drawCards(elm) {
+    // canvasを使うはず
+}
+
 initialise()
 
 console.log(setCards)
