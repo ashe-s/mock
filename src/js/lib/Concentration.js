@@ -28,7 +28,7 @@ let setCards = lawCards.map(val => {
     return newVal
 })
 setCards.map(val => {
-    setCards.push(val)
+    setCards.push(Object.assign({}, val))
 })
 
 const status = {
@@ -51,7 +51,8 @@ function initialise() {
  */
 function gameController() {
     const posx = 1, posy = 1 // for test
-    const currentCard = setCards[getCardIndexfromPos(posx, posy)]
+    const currentCardIndex = getCardIndexfromPos(posx, posy)
+    const currentCard = setCards[currentCardIndex]
     // 再描画&裏返しアニメーション
     currentCard.isOpened = true
 
@@ -60,23 +61,24 @@ function gameController() {
         return
     }
 
-    if (status.cardOpened === currentCard.id) {
+    if (status.cardOpened === currentCardIndex) {
         status.numSuccess++
         if (status.numSuccess >= settings.maxSuccess) {
             gameClear()
             return
         }
-        turnSuccess()
-        return
+        turnSuccess(currentCardIndex)
     } else {
         status.numFailure++
         if (status.numFailure >= settings.maxFailure) {
             gameOver()
             return
         }
-        turnFailure()
-        return
+        turnFailure(currentCardIndex)
     }
+
+    status.cardOpened = null
+    return
 }
 
 function getCardIndexfromPos(posx, posy) {
@@ -88,9 +90,19 @@ function getCardIndexfromPos(posx, posy) {
 /**
  * ターン終了時のそれぞれの動作
  */
-function turnSuccess() {}
+function turnSuccess(currentCardIndex) {
+    setCards[status.cardOpened].isCleared = true
+    setCards[currentCardIndex].isCleared = true
+    // カードを消す
+    return
+}
 
-function turnFailure() {}
+function turnFailure(currentCardIndex) {
+    setCards[status.cardOpened].isOpened = false
+    setCards[currentCardIndex].isOpened = false
+    // カードを裏返す
+    return
+}
 
 /**
  * ゲーム終了時の動作
@@ -105,4 +117,4 @@ function gameOver() {
 
 initialise()
 
-console.log(status)
+console.log(setCards)
