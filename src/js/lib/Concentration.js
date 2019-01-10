@@ -117,10 +117,16 @@ function gameOver() {
 
 /**
  * カードを表示
- * @param {Object} elm // viewエリアになるDOM要素
+ * @param {Object} canvas // viewエリアになるDOM要素
  */
-function drawCards(elm) {
+function drawCards(canvas) {
     // canvasを使うはず
+    // isOpened = false のやつは等しく裏を表示
+    // isOpened = true のやつだけ要素を表示
+    // isCleared = true のやつは画像なし（消去）で空白表示
+    // 敷き詰める繰り返しがちょっと面倒そう
+
+    // ひっくり返す演出とか入れるとしたらどうやるんだろうね（死）
 }
 
 initialise()
