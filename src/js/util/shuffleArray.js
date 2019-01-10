@@ -1,6 +1,5 @@
 export default function shuffleArray (array) {
-    const n = array.length
-    let t, i
+    let n = array.length, t, i
 
     while (n) {
         i = Math.floor(Math.random() * n--)
