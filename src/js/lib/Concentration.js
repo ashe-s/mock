@@ -1,3 +1,4 @@
+import pixi from 'pixi.js'
 import shuffle from '@/util/shuffleArray'
 
 /***
@@ -21,18 +22,18 @@ const lawCards = [{
 
 // 実際に配置するカードのデータ
 // 元データにパラメータを追加し要素を複製、2倍にしておく
-let setCards = lawCards.map(val => {
+let gameCards = lawCards.map(val => {
     const newVal = Object.assign({}, val)
     newVal.isOpened = false
     newVal.isCleared = false
     return newVal
 })
-setCards.map(val => {
-    setCards.push(Object.assign({}, val))
+gameCards.map(val => {
+    gameCards.push(Object.assign({}, val))
 })
 
 const status = {
-    cardOpened: null, // setCards のうち表になってるカードのindex
+    cardOpened: null, // gameCards のうち表になってるカードのindex
     numSuccess: 0,
     numFailure: 0
 }
@@ -41,7 +42,7 @@ const status = {
  * 初期化
  */
 function initialise() {
-    shuffle(setCards)
+    shuffle(gameCards)
     // 表示する
     gameController()
 }
@@ -52,7 +53,7 @@ function initialise() {
 function gameController() {
     const posx = 1, posy = 1 // for test
     const currentCardIndex = getCardIndexfromPos(posx, posy)
-    const currentCard = setCards[currentCardIndex]
+    const currentCard = gameCards[currentCardIndex]
     // 再描画&裏返しアニメーション
     currentCard.isOpened = true
 
@@ -67,14 +68,14 @@ function gameController() {
             gameClear()
             return
         }
-        turnSuccess(currentCardIndex)
+        clearTurnCards(currentCardIndex)
     } else {
         status.numFailure++
         if (status.numFailure >= settings.maxFailure) {
             gameOver()
             return
         }
-        turnFailure(currentCardIndex)
+        resetTurnCards(currentCardIndex)
     }
 
     status.cardOpened = null
@@ -90,16 +91,16 @@ function getCardIndexfromPos(posx, posy) {
 /**
  * ターン終了時のそれぞれの動作
  */
-function turnSuccess(currentCardIndex) {
-    setCards[status.cardOpened].isCleared = true
-    setCards[currentCardIndex].isCleared = true
+function clearTurnCards(currentCardIndex) {
+    gameCards[status.cardOpened].isCleared = true
+    gameCards[currentCardIndex].isCleared = true
     // カードを消す
     return
 }
 
-function turnFailure(currentCardIndex) {
-    setCards[status.cardOpened].isOpened = false
-    setCards[currentCardIndex].isOpened = false
+function resetTurnCards(currentCardIndex) {
+    gameCards[status.cardOpened].isOpened = false
+    gameCards[currentCardIndex].isOpened = false
     // カードを裏返す
     return
 }
@@ -131,4 +132,4 @@ function drawCards(canvas) {
 
 initialise()
 
-console.log(setCards)
+console.log(gameCards)
