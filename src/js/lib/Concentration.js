@@ -1,9 +1,12 @@
-import pixi from 'pixi.js'
+import * as PIXI from 'pixi.js'
 import shuffle from '@/util/shuffleArray'
 
 /***
- * 設定変数
+ * 設定
  */
+// canvas
+const app = new PIXI.Application({});
+
 // 基本設定
 const settings = {
     maxSuccess: 1, // n回正解したらゲームクリア
@@ -13,6 +16,7 @@ const settings = {
     margin: 20
 }
 
+
 // 元となるカードのデータ
 const lawCards = [{
     id: 'card1'
@@ -20,20 +24,20 @@ const lawCards = [{
     id: 'card2'
 }]
 
-// 実際に配置するカードのデータ
+// 実際に配置するカードの中身
 // 元データにパラメータを追加し要素を複製、2倍にしておく
-let gameCards = lawCards.map(val => {
+const fieldCards = lawCards.map(val => {
     const newVal = Object.assign({}, val)
     newVal.isOpened = false
     newVal.isCleared = false
     return newVal
 })
-gameCards.map(val => {
-    gameCards.push(Object.assign({}, val))
+fieldCards.map(val => {
+    fieldCards.push(Object.assign({}, val))
 })
 
 const status = {
-    cardOpened: null, // gameCards のうち表になってるカードのindex
+    cardOpened: null, // fieldCards のうち表になってるカードのindex
     numSuccess: 0,
     numFailure: 0
 }
@@ -41,9 +45,13 @@ const status = {
 /**
  * 初期化
  */
-function initialise() {
-    shuffle(gameCards)
+function initialise(elm) {
+    shuffle(fieldCards)
+
     // 表示する
+    // Add the view to the DOM
+    // elm.appendChild(app.view);
+
     gameController()
 }
 
@@ -53,7 +61,7 @@ function initialise() {
 function gameController() {
     const posx = 1, posy = 1 // for test
     const currentCardIndex = getCardIndexfromPos(posx, posy)
-    const currentCard = gameCards[currentCardIndex]
+    const currentCard = fieldCards[currentCardIndex]
     // 再描画&裏返しアニメーション
     currentCard.isOpened = true
 
@@ -92,15 +100,15 @@ function getCardIndexfromPos(posx, posy) {
  * ターン終了時のそれぞれの動作
  */
 function clearTurnCards(currentCardIndex) {
-    gameCards[status.cardOpened].isCleared = true
-    gameCards[currentCardIndex].isCleared = true
+    fieldCards[status.cardOpened].isCleared = true
+    fieldCards[currentCardIndex].isCleared = true
     // カードを消す
     return
 }
 
 function resetTurnCards(currentCardIndex) {
-    gameCards[status.cardOpened].isOpened = false
-    gameCards[currentCardIndex].isOpened = false
+    fieldCards[status.cardOpened].isOpened = false
+    fieldCards[currentCardIndex].isOpened = false
     // カードを裏返す
     return
 }
@@ -118,9 +126,8 @@ function gameOver() {
 
 /**
  * カードを表示
- * @param {Object} canvas // viewエリアになるDOM要素
  */
-function drawCards(canvas) {
+function drawCards() {
     // canvasを使うはず
     // isOpened = false のやつは等しく裏を表示
     // isOpened = true のやつだけ要素を表示
@@ -132,4 +139,4 @@ function drawCards(canvas) {
 
 initialise()
 
-console.log(gameCards)
+console.log(fieldCards)
