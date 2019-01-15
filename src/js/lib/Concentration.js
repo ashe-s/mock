@@ -2,15 +2,20 @@ import * as PIXI from 'pixi.js'
 import shuffle from '@/util/shuffleArray'
 
 /***
- * 設定
+ * ゲーム設定
  */
-// 基本設定
-const settings = {
+// ゲーム終了条件
+const rules = {
     maxSuccess: 1, // n回正解したらゲームクリア
     maxFailure: 3, // n回連続で失敗したらゲームオーバー？
+}
+
+// 表示用値設定
+const sizes = {
     cardW: 200,
     cardH: 300,
-    marginLow: 20
+    appW: 420,
+    appH: 620
 }
 
 // 元となるカードのデータ
@@ -68,14 +73,14 @@ function gameController() {
 
     if (status.cardOpened === currentCardIndex) {
         status.numSuccess++
-        if (status.numSuccess >= settings.maxSuccess) {
+        if (status.numSuccess >= rules.maxSuccess) {
             gameClear()
             return
         }
         clearTurnCards(currentCardIndex)
     } else {
         status.numFailure++
-        if (status.numFailure >= settings.maxFailure) {
+        if (status.numFailure >= rules.maxFailure) {
             gameOver()
             return
         }
@@ -123,8 +128,18 @@ function gameOver() {
 /**
  * カードを表示
  */
-// canvas
-const app = new PIXI.Application({});
+// canvas設定
+const app = new PIXI.Application({
+    width: sizes.appW,
+    height: sizes.appH
+});
+// カードサイズとキャンバスサイズからカード間マージンを求める
+const margin = {
+    x: sizes.appW % sizes.cardW / (Math.floor(sizes.appW / sizes.cardW) - 1),
+    y: sizes.appH % sizes.cardH / (Math.floor(sizes.appH / sizes.cardH) - 1)
+}
+
+
 
 function drawCards() {
     // canvasを使うはず
@@ -138,7 +153,7 @@ function drawCards() {
 
 initialise()
 
-console.log(fieldCards)
+console.log(margin)
 
 // var app = new PIXI.Application();
 // document.body.appendChild(app.view);
@@ -187,18 +202,6 @@ for (var i = 0; i < 5; i++) {
         .on('pointerupoutside', onButtonUp)
         .on('pointerover', onButtonOver)
         .on('pointerout', onButtonOut);
-
-    // Use mouse-only events
-    // .on('mousedown', onButtonDown)
-    // .on('mouseup', onButtonUp)
-    // .on('mouseupoutside', onButtonUp)
-    // .on('mouseover', onButtonOver)
-    // .on('mouseout', onButtonOut)
-
-    // Use touch-only events
-    // .on('touchstart', onButtonDown)
-    // .on('touchend', onButtonUp)
-    // .on('touchendoutside', onButtonUp)
 
     // add it to the stage
     app.stage.addChild(button);
