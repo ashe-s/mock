@@ -18,6 +18,23 @@ const sizes = {
     appH: 620
 }
 
+// canvas設定
+const app = new PIXI.Application({
+    width: sizes.appW,
+    height: sizes.appH,
+    backgroundColor: 0xffffff
+});
+
+// カードサイズとキャンバスサイズから行と列のカード枚数を求める
+const colnum = Math.floor(sizes.appW / sizes.cardW)
+const rownum = Math.floor(sizes.appH / sizes.cardH)
+const margin = {
+    x: sizes.appW % sizes.cardW / (colnum - 1),
+    y: sizes.appH % sizes.cardH / (rownum - 1),
+}
+
+const textureBack = PIXI.Texture.fromImage('img/concentration/back.png')
+
 // 元となるカードのデータ
 const lawCards = [{
     id: 'card1'
@@ -43,74 +60,98 @@ const status = {
     numFailure: 0
 }
 
+
 /**
  * 初期化
  */
 function initialise(elm) {
     shuffle(fieldCards)
 
-    // 表示する
-    // Add the view to the DOM
-    // elm.appendChild(app.view);
+    document.getElementById('concentration').appendChild(app.view)
+    drawCards()
+}
 
-    gameController()
+/**
+ * カードを表示
+ */
+function drawCards() {
+    for (let row = 0; row < rownum; row++) {
+        for (let col = 0; col < colnum; col ++) {
+            let card = new PIXI.Sprite(textureBack)
+            card.interactive = true
+            card.buttonMode = true
+
+            card.width = sizes.cardW
+            card.height = sizes.cardH
+            card.x = row * (sizes.cardW + margin.x)
+            card.y = col * (sizes.cardH + margin.y)
+
+            const cardIndex = row * colnum + col
+
+            card.on('pointerdown', function() {
+                gameController(cardIndex)
+            })
+
+            app.stage.addChild(card)
+            fieldCards[cardIndex].pixiSprite = card
+        }
+    }
+    // isOpened = false のやつは等しく裏を表示
+    // isOpened = true のやつだけ要素を表示
+    // isCleared = true のやつは画像なし（消去）で空白表示
+
+    // ひっくり返す演出とか入れるとしたらどうやるんだろうね（死）
 }
 
 /**
  * ゲームを管理
  */
-function gameController() {
-    const posx = 1, posy = 1 // for test
-    const currentCardIndex = getCardIndexfromPos(posx, posy)
-    const currentCard = fieldCards[currentCardIndex]
+function gameController(cardIndex) {
+    if(status.cardOpened === cardIndex) return
+
+    const currentCard = fieldCards[cardIndex]
     // 再描画&裏返しアニメーション
     currentCard.isOpened = true
 
     if(!status.cardOpened) {
-        status.cardOpened = currentCard.id
+        status.cardOpened = cardIndex
         return
     }
 
-    if (status.cardOpened === currentCardIndex) {
+    if (fieldCards[status.cardOpened].id === fieldCards[cardIndex].id) {
         status.numSuccess++
         if (status.numSuccess >= rules.maxSuccess) {
             gameClear()
             return
         }
-        clearTurnCards(currentCardIndex)
+        clearTurnCards(cardIndex)
     } else {
         status.numFailure++
         if (status.numFailure >= rules.maxFailure) {
             gameOver()
             return
         }
-        resetTurnCards(currentCardIndex)
+        resetTurnCards(cardIndex)
     }
 
     status.cardOpened = null
     return
 }
 
-function getCardIndexfromPos(posx, posy) {
-    // クリックされた縦位置を元にどの要素がクリックされたか判定
-    let cardindex = 1
-    return cardindex
-}
-
 /**
  * ターン終了時のそれぞれの動作
  */
-function clearTurnCards(currentCardIndex) {
-    fieldCards[status.cardOpened].isCleared = true
-    fieldCards[currentCardIndex].isCleared = true
-    // カードを消す
+function resetTurnCards(cardIndex) {
+    fieldCards[status.cardOpened].isOpened = false
+    fieldCards[cardIndex].isOpened = false
+    // カードを裏返す
     return
 }
 
-function resetTurnCards(currentCardIndex) {
-    fieldCards[status.cardOpened].isOpened = false
-    fieldCards[currentCardIndex].isOpened = false
-    // カードを裏返す
+function clearTurnCards(cardIndex) {
+    fieldCards[status.cardOpened].isCleared = true
+    fieldCards[cardIndex].isCleared = true
+    // カードを消す
     return
 }
 
@@ -118,132 +159,11 @@ function resetTurnCards(currentCardIndex) {
  * ゲーム終了時の動作
  */
 function gameClear() {
-    alart('clear!')
+    alert('clear!')
 }
 
 function gameOver() {
-    alart('game over!')
-}
-
-/**
- * カードを表示
- */
-// canvas設定
-const app = new PIXI.Application({
-    width: sizes.appW,
-    height: sizes.appH
-});
-// カードサイズとキャンバスサイズからカード間マージンを求める
-const margin = {
-    x: sizes.appW % sizes.cardW / (Math.floor(sizes.appW / sizes.cardW) - 1),
-    y: sizes.appH % sizes.cardH / (Math.floor(sizes.appH / sizes.cardH) - 1)
-}
-
-
-
-function drawCards() {
-    // canvasを使うはず
-    // isOpened = false のやつは等しく裏を表示
-    // isOpened = true のやつだけ要素を表示
-    // isCleared = true のやつは画像なし（消去）で空白表示
-    // 敷き詰める繰り返しがちょっと面倒そう
-
-    // ひっくり返す演出とか入れるとしたらどうやるんだろうね（死）
+    alert('game over!')
 }
 
 initialise()
-
-console.log(margin)
-
-// var app = new PIXI.Application();
-// document.body.appendChild(app.view);
-
-// create a background...
-// var background = PIXI.Sprite.fromImage('required/assets/button_test_BG.jpg');
-// background.width = app.screen.width;
-// background.height = app.screen.height;
-
-// add background to stage...
-// app.stage.addChild(background);
-
-// create some textures from an image path
-var textureButton = PIXI.Texture.fromImage('required/assets/button.png');
-var textureButtonDown = PIXI.Texture.fromImage('required/assets/buttonDown.png');
-var textureButtonOver = PIXI.Texture.fromImage('required/assets/buttonOver.png');
-
-var buttons = [];
-
-var buttonPositions = [
-    175, 75,
-    655, 75,
-    410, 325,
-    150, 465,
-    685, 445
-];
-
-for (var i = 0; i < 5; i++) {
-    var button = new PIXI.Sprite(textureButton);
-    button.buttonMode = true;
-
-    button.anchor.set(0.5);
-    button.x = buttonPositions[i * 2];
-    button.y = buttonPositions[i * 2 + 1];
-
-    // make the button interactive...
-    button.interactive = true;
-    button.buttonMode = true;
-
-    button
-        // Mouse & touch events are normalized into
-        // the pointer* events for handling different
-        // button events.
-        .on('pointerdown', onButtonDown)
-        .on('pointerup', onButtonUp)
-        .on('pointerupoutside', onButtonUp)
-        .on('pointerover', onButtonOver)
-        .on('pointerout', onButtonOut);
-
-    // add it to the stage
-    app.stage.addChild(button);
-
-    // add button to array
-    buttons.push(button);
-}
-
-// set some silly values...
-buttons[0].scale.set(1.2);
-buttons[2].rotation = Math.PI / 10;
-buttons[3].scale.set(0.8);
-buttons[4].scale.set(0.8, 1.2);
-buttons[4].rotation = Math.PI;
-
-function onButtonDown() {
-    this.isdown = true;
-    this.texture = textureButtonDown;
-    this.alpha = 1;
-}
-
-function onButtonUp() {
-    this.isdown = false;
-    if (this.isOver) {
-        this.texture = textureButtonOver;
-    } else {
-        this.texture = textureButton;
-    }
-}
-
-function onButtonOver() {
-    this.isOver = true;
-    if (this.isdown) {
-        return;
-    }
-    this.texture = textureButtonOver;
-}
-
-function onButtonOut() {
-    this.isOver = false;
-    if (this.isdown) {
-        return;
-    }
-    this.texture = textureButton;
-}
